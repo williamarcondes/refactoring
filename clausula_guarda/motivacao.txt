@@ -1,0 +1,117 @@
+A method has conditional behavior that does not make clear the normal path
+of execution.
+
+
+Use guard clauses for all the special cases.
+
+
+def pay_amount
+if @dead
+result = dead_amount
+else
+if @separated
+result = separated_amount
+else
+if @retired
+result = retired_amount
+else
+result = normal_pay_amount
+end
+end
+end
+result
+end
+
+
+def pay_amount
+return dead_amount if @dead
+return separated_amount if @separated
+return retired_amount if @retired
+normal_pay_amount
+end
+
+
+
+Motivation
+I often find that conditional expressions come in two forms. The first form is a
+check where either course is part of the normal behavior. The second form is a
+situation in which one answer from the conditional indicates normal behavior
+and the other indicates an unusual condition.
+These kinds of conditionals have different intentions, and these intentions
+should come through in the code. If both are part of normal behavior, use a con-
+dition with an if and an else leg. If the condition is an unusual condition, check
+the condition and return if the condition is true. This kind of check is often
+called a guard clause [Beck].
+The key point about Replace Nested Conditional with Guard Clauses is
+one of emphasis. If you are using an if-then-else construct you are giving equal
+
+
+weight to the if leg and the else leg. This communicates to the reader that the
+legs are equally likely and important. Instead the guard clause says, “This is
+rare, and if it happens, do something and get out.”
+I often find I use Replace Nested Conditional with Guard Clauses when I’m
+working with a programmer who has been taught to have only one entry point
+and one exit point from a method. One entry point is enforced by modern lan-
+guages, and one exit point is really not a useful rule. Clarity is the key principle:
+If the method is clearer with one exit point, use one exit point; otherwise don’t.
+Mechanics
+1. For each check put in the guard clause.
+The guard clause either returns, or throws an exception.
+2. Test after each check is replaced with a guard clause.
+If all guard clauses yield the same result, use Consolidate Condi-
+tional Expressions.
+
+
+
+
+Example
+Imagine a run of a payroll system in which you have special rules for dead,
+separated, and retired employees. Such cases are unusual, but they do happen
+from time to time.
+If I see the code like this :
+
+
+
+def pay_amount
+if @dead
+result = dead_amount
+else
+if @separated
+result = separated_amount
+else
+if @retired
+result = retired_amount
+else
+result = normal_pay_amount
+end
+end
+end
+result
+
+end
+Then the checking is masking the normal course of action behind the check-
+ing. So instead it is clearer to use guard clauses. I can introduce these one at a
+time. I like to start at the top:
+def pay_amount
+return dead_amount if @dead
+if @separated
+result = separated_amount
+else
+if @retired
+result = retired_amount
+else
+result = normal_pay_amount
+end
+end
+result
+end
+I continue one at a time:
+def pay_amount
+return dead_amount if @dead
+return separated_amount if @separated
+if @retired
+result = retired_amount
+else
+result = normal_pay_amount
+end
+result
